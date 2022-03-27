@@ -71,3 +71,16 @@ export const getProcessIdOnPort = (port: number): string => {
     .split("\n")[0]
     .trim();
 };
+
+/**
+ * Get the directory of the process with the given id (pid).
+ *
+ * @param processId - Process id.
+ * @returns Returns the directory of the process.
+ */
+export const getDirectoryOfProcessById = (processId: string): string => {
+
+  return child_process
+    .execSync("lsof -p " + processId + " | awk '$4==\"cwd\" {for (i=9; i<=NF; i++) printf \"%s \", $i}'", execOptions)
+    .trim();
+};
