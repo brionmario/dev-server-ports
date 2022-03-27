@@ -23,6 +23,7 @@
  */
 
 import child_process, { ExecSyncOptionsWithStringEncoding } from "child_process";
+import path from "path";
 
 const execOptions: ExecSyncOptionsWithStringEncoding = {
   encoding: "utf8",
@@ -94,4 +95,22 @@ export const getDirectoryOfProcessById = (processId: string): string => {
 const isKnownNodeProcess = (processCommand: string): boolean => {
 
   return /^node .*react-scripts\/scripts\/start\.js\s?$/.test(processCommand);
+};
+
+/**
+ * Get the package name in the given directory.
+ *
+ * @param directory - Directory to search for package.json.
+ * @returns Returns the package name.
+ */
+export const getPackageNameInDirectory = (directory: string): string | null => {
+
+  const packagePath: string = path.join(directory.trim(), "package.json");
+
+  try {
+    // eslint-disable-next-line @typescript-eslint/no-var-requires
+    return require(packagePath).name;
+  } catch (e) {
+    return null;
+  }
 };
