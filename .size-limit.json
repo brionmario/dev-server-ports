@@ -1,0 +1,10 @@
+[
+  {
+    "path": "dist/dev-server-ports.cjs.production.min.js",
+    "limit": "10 KB"
+  },
+  {
+    "path": "dist/dev-server-ports.esm.js",
+    "limit": "10 KB"
+  }
+]
