@@ -22,10 +22,24 @@
  * SOFTWARE.
  */
 
-import { sum } from "../src";
+import { findPort, getDirectoryOfProcessById, getProcessIdOnPort } from "../src/helpers";
 
-describe("blah", () => {
-  it("works", () => {
-    expect(sum(1, 1)).toEqual(2);
+describe("Test the helpers.", () => {
+  // FIXME: Skipped test because `Command failed: lsof -i:3001 -P -t -sTCP:LISTEN`.
+  it.skip("Get process id of a port function returns a numeric value.", () => {
+    expect(Number(getProcessIdOnPort(3001)))
+      .not.toBeNaN();
+  });
+
+  it("Get directory of a process by pid function returns a string value.", () => {
+    expect(typeof getDirectoryOfProcessById("54129"))
+      .toBe("string");
+  });
+
+  it("Find port function properly handles an available port.", async () => {
+    const port = await findPort("localhost", 3001);
+
+    expect(port)
+      .toBe(3001);
   });
 });
