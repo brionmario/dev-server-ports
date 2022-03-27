@@ -22,6 +22,18 @@
  * SOFTWARE.
  */
 
+import child_process, { ExecSyncOptionsWithStringEncoding } from "child_process";
+
+const execOptions: ExecSyncOptionsWithStringEncoding = {
+  encoding: "utf8",
+  // eslint-disable-next-line @typescript-eslint/no-array-constructor
+  stdio: [
+    "pipe", // stdin (default)
+    "pipe", // stdout (default)
+    "ignore" //stderr
+  ]
+};
+
 /**
  * Clears the terminal screen.
  *
@@ -37,4 +49,25 @@
 export const clearTerminal = (): void => {
 
   process.stdout.write(process.platform === "win32" ? "\x1B[2J\x1B[0f" : "\x1B[2J\x1B[3J\x1B[H");
+};
+
+/**
+ * Get the process id (pid) on the given port.
+ *
+ * @example
+ * Usage:
+ * ```
+ * // Returns a numeric value as a string like "55543".
+ * getProcessIdOnPort(3000);
+ * ```
+ *
+ * @param port - Port number.
+ * @returns 
+ */
+export const getProcessIdOnPort = (port: number): string => {
+
+  return child_process
+    .execFileSync("lsof", [ "-i:" + port, "-P", "-t", "-sTCP:LISTEN" ], execOptions)
+    .split("\n")[0]
+    .trim();
 };
