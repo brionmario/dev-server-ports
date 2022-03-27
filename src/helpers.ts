@@ -24,6 +24,7 @@
 
 import child_process, { ExecSyncOptionsWithStringEncoding } from "child_process";
 import path from "path";
+import chalk from "chalk";
 
 const execOptions: ExecSyncOptionsWithStringEncoding = {
   encoding: "utf8",
@@ -135,5 +136,24 @@ export const getProcessCommand = (processId: string, processDirectory: string): 
     return packageName ? packageName : command;
   } else {
     return command;
+  }
+};
+
+/**
+ * Get the process information for the given port.
+ *
+ * @param port - Port number.
+ * @returns Returns the process information.
+ */
+export const getProcessForPort = (port: number) => {
+  
+  try {
+    const processId: string = getProcessIdOnPort(port);
+    const directory: string = getDirectoryOfProcessById(processId);
+    const command: string= getProcessCommand(processId, directory);
+
+    return chalk.cyan(command) + chalk.grey(" (pid " + processId + ")\n") + chalk.blue("  in ") + chalk.cyan(directory);
+  } catch (e) {
+    return null;
   }
 };
