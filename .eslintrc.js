@@ -90,6 +90,9 @@ module.exports = {
         ecmaVersion: 9,
         sourceType: "module"
       },
+      plugins: [
+        "eslint-plugin-tsdoc"
+      ],
       rules: {
         "@typescript-eslint/ban-types": SEVERITY.WARN,
         "@typescript-eslint/explicit-function-return-type": SEVERITY.OFF,
@@ -127,7 +130,8 @@ module.exports = {
         // https://github.com/typescript-eslint/typescript-eslint/issues/2477#issuecomment-686892459
         "no-undef": SEVERITY.OFF,
         "no-use-before-define": SEVERITY.OFF,
-        "padding-line-between-statements": SEVERITY.OFF
+        "padding-line-between-statements": SEVERITY.OFF,
+        "tsdoc/syntax": SEVERITY.WARN
       }
     }
   ],
