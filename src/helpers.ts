@@ -25,6 +25,13 @@
 import child_process, { ExecSyncOptionsWithStringEncoding } from "child_process";
 import path from "path";
 import chalk from "chalk";
+import detect from "detect-port";
+import inquirer, { Question } from "inquirer";
+import isRoot from "is-root";
+import { logger } from "./utils";
+
+// Check if the process is running on a text terminal.
+const IS_INTERACTIVE: boolean = process.stdout.isTTY;
 
 const execOptions: ExecSyncOptionsWithStringEncoding = {
   encoding: "utf8",
@@ -156,4 +163,71 @@ export const getProcessForPort = (port: number) => {
   } catch (e) {
     return null;
   }
+};
+
+/**
+ * Find a port that is available for use.
+ *
+ * @param hostname - Host name. ex: "0.0.0.0" | "localhost"
+ * @param prefferedPort - Preffered port number. ex: 3000
+ * @returns Returns a promise that resolves to the available port or null on error.
+ */
+export const findPort = (hostname: string, prefferedPort: number): Promise<number | null> => {
+  return detect({
+    hostname,
+    port: prefferedPort
+  })
+    .then((port) => new Promise(
+      (resolve) => {
+        if (port === prefferedPort) {
+          return resolve(port);
+        }
+
+        const message: string = (process.platform !== "win32" && prefferedPort < 1024 && !isRoot())
+          ? "Admin permissions are required to run a server on a port below 1024."
+          : `Something is already running on port ${prefferedPort}.`;
+
+        if (IS_INTERACTIVE) {
+          // First clear the terminal.
+          clearTerminal();
+
+          const existingProcess: string | null = getProcessForPort(prefferedPort);
+          const question: Question = {
+            default: true,
+            message: chalk.yellow(message + `${existingProcess ? ` Probably:\n  ${existingProcess}` : ""}`) +
+              "\n\nWould you like to run the app on another port instead?",
+            name: "shouldChangePort",
+            type: "confirm"
+          };
+
+          inquirer
+            .prompt([ question ])
+            .then((answers) => {
+              if (answers.shouldChangePort) {
+                resolve(port);
+              } else {
+                resolve(null);
+              }
+            })
+            .catch((error) => {
+              if (error.isTtyError) {
+                chalk.red("Prompt couldn't be rendered in the current environment.");
+              } else {
+                chalk.red("Something wen wrong when trying to render the prompt.");
+              }
+            });
+        } else {
+          logger.error(chalk.red(message));
+          resolve(null);
+        }
+      }
+    ),
+    (err) => {
+      throw new Error(
+        chalk.red(`Could not find an open port at ${chalk.bold(hostname)}.`) +
+              "\n" +
+              ("Network error message: " + err.message || err) +
+              "\n"
+      );
+    });
 };
