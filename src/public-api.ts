@@ -22,4 +22,4 @@
  * SOFTWARE.
  */
 
-export * from "./public-api";
+export * from "./helpers";
