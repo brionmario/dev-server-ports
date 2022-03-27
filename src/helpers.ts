@@ -114,3 +114,26 @@ export const getPackageNameInDirectory = (directory: string): string | null => {
     return null;
   }
 };
+
+/**
+ * Get the command ran for the process with the given id (pid).
+ *
+ * @param processId - Process id.
+ * @param processDirectory - Directory of the process.
+ * @returns Returns the command ran for the process.
+ */
+export const getProcessCommand = (processId: string, processDirectory: string): string => {
+
+  let command: string = child_process.execSync("ps -o command -p " + processId + " | sed -n 2p", execOptions);
+
+  command = command.replace(/\n$/, "");
+
+  // If thr process is a known Node.js process, get the package name from `package.json`.
+  if (isKnownNodeProcess(command)) {
+    const packageName: string | null = getPackageNameInDirectory(processDirectory);
+
+    return packageName ? packageName : command;
+  } else {
+    return command;
+  }
+};
