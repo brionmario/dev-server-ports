@@ -142,6 +142,7 @@ module.exports = {
       SEVERITY.WARN,
       "always"
     ],
+    "arrow-parens": [ SEVERITY.ERROR, "always" ],
     "comma-dangle": [
       SEVERITY.WARN,
       "never"
@@ -175,6 +176,12 @@ module.exports = {
       SEVERITY.WARN,
       {
         code: 120
+      }
+    ],
+    "newline-per-chained-call": [
+      SEVERITY.ERROR,
+      {
+        "ignoreChainWithDepth": 1
       }
     ],
     "no-alert": SEVERITY.WARN,
@@ -211,6 +218,7 @@ module.exports = {
       "always"
     ],
     "padding-line-between-statements": [ ...LINE_PADDING_RULES ],
+    "prefer-arrow-callback": SEVERITY.ERROR,
     quotes: [
       SEVERITY.WARN,
       "double"
