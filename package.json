@@ -28,17 +28,19 @@
         "node": ">=10"
     },
     "scripts": {
-        "start": "tsdx watch",
+        "analyze": "size-limit --why",
         "build": "tsdx build",
-        "test": "tsdx test",
+        "cm": "cz",
         "lint": "eslint --ext .js,.ts .",
         "prepare": "tsdx build",
         "size": "size-limit",
-        "analyze": "size-limit --why"
+        "start": "tsdx watch",
+        "test": "tsdx test"
     },
     "husky": {
         "hooks": {
-            "pre-commit": "npm run lint"
+            "pre-commit": "npm run lint",
+            "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
         }
     },
     "module": "dist/dynamic-dev-server-port.esm.js",
@@ -58,6 +60,8 @@
         "@types/inquirer": "^8.2.0",
         "@typescript-eslint/eslint-plugin": "^5.16.0",
         "@typescript-eslint/parser": "^5.16.0",
+        "commitizen": "^4.2.4",
+        "cz-conventional-changelog": "^3.3.0",
         "eslint": "^8.12.0",
         "eslint-plugin-import": "^2.25.4",
         "husky": "^7.0.4",
