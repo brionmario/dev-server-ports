@@ -85,7 +85,7 @@ jobs:
   test:
     name: 👾 Unit Test (TESTING)
     needs: [ lint, typecheck ]
-    runs-on: ubuntu-latest
+        os: [ ubuntu-latest, windows-latest, macOS-latest ]
     strategy:
       matrix:
         node-version: [ "12.x", "14.x" ]
