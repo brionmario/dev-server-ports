@@ -84,3 +84,14 @@ export const getDirectoryOfProcessById = (processId: string): string => {
     .execSync("lsof -p " + processId + " | awk '$4==\"cwd\" {for (i=9; i<=NF; i++) printf \"%s \", $i}'", execOptions)
     .trim();
 };
+
+/**
+ * Checks if the process is a known Node.js process.
+ *
+ * @param processCommand - Command ran for the process.
+ * @returns Returns true if the process is a React app.
+ */
+const isKnownNodeProcess = (processCommand: string): boolean => {
+
+  return /^node .*react-scripts\/scripts\/start\.js\s?$/.test(processCommand);
+};
