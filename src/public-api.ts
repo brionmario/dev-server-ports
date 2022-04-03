@@ -22,4 +22,5 @@
  * SOFTWARE.
  */
 
+export * from "./reporter";
 export * from "./helpers";

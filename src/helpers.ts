@@ -28,6 +28,7 @@ import chalk from "chalk";
 import detect from "detect-port";
 import inquirer, { Question } from "inquirer";
 import isRoot from "is-root";
+import { Reporter } from "./reporter";
 import { logger } from "./utils";
 
 // Check if the process is running on a text terminal.
@@ -159,7 +160,7 @@ export const getProcessForPort = (port: number) => {
     const directory: string = getDirectoryOfProcessById(processId);
     const command: string= getProcessCommand(processId, directory);
 
-    return chalk.cyan(command) + chalk.grey(" (pid " + processId + ")\n") + chalk.blue("  in ") + chalk.cyan(directory);
+    return Reporter.reportProcessInfo(command, processId, directory);
   } catch (e) {
     return null;
   }
@@ -168,34 +169,44 @@ export const getProcessForPort = (port: number) => {
 /**
  * Find a port that is available for use.
  *
+ * @param port - Preffered port number. ex: 3000
  * @param hostname - Host name. ex: "0.0.0.0" | "localhost"
- * @param prefferedPort - Preffered port number. ex: 3000
  * @returns Returns a promise that resolves to the available port or null on error.
  */
-export const findPort = (hostname: string, prefferedPort: number): Promise<number | null> => {
+export const findPort = (port: number,
+  hostname?: string,
+  skip?: number
+): Promise<number | null> => {
+
+  if (skip) {
+    if (__DEV__) {
+      logger.debug("Skipping port feature is not yet implemented.");
+    }
+  }
+
   return detect({
     hostname,
-    port: prefferedPort
+    port
   })
-    .then((port) => new Promise(
+    .then((_port) => new Promise(
       (resolve) => {
-        if (port === prefferedPort) {
-          return resolve(port);
+        if (_port === port) {
+          return resolve(_port);
         }
 
-        const message: string = (process.platform !== "win32" && prefferedPort < 1024 && !isRoot())
-          ? "Admin permissions are required to run a server on a port below 1024."
-          : `Something is already running on port ${prefferedPort}.`;
+        const disclaimer: string = (process.platform !== "win32" && _port < 1024 && !isRoot())
+          ? Reporter.reportRequireRootPermission()
+          : Reporter.reportPortInUseDisclaimer(_port);
 
         if (IS_INTERACTIVE) {
           // First clear the terminal.
           clearTerminal();
 
-          const existingProcess: string | null = getProcessForPort(prefferedPort);
+          const processInfo: string | null = getProcessForPort(port);
+          const confirmation: string = Reporter.reportPortFallbackConfirmation();
           const question: Question = {
             default: true,
-            message: chalk.yellow(message + `${existingProcess ? ` Probably:\n  ${existingProcess}` : ""}`) +
-              "\n\nWould you like to run the app on another port instead?",
+            message: Reporter.reportPortInUse(disclaimer, processInfo, confirmation),
             name: "shouldChangePort",
             type: "confirm"
           };
@@ -204,30 +215,25 @@ export const findPort = (hostname: string, prefferedPort: number): Promise<numbe
             .prompt([ question ])
             .then((answers) => {
               if (answers.shouldChangePort) {
-                resolve(port);
+                resolve(_port);
               } else {
                 resolve(null);
               }
             })
             .catch((error) => {
               if (error.isTtyError) {
-                chalk.red("Prompt couldn't be rendered in the current environment.");
+                Reporter.reportUninteractiveTerminalError();
               } else {
-                chalk.red("Something wen wrong when trying to render the prompt.");
+                Reporter.reportGenericPromptError();
               }
             });
         } else {
-          logger.error(chalk.red(message));
+          logger.error(chalk.red(disclaimer));
           resolve(null);
         }
       }
     ),
     (err) => {
-      throw new Error(
-        chalk.red(`Could not find an open port at ${chalk.bold(hostname)}.`) +
-              "\n" +
-              ("Network error message: " + err.message || err) +
-              "\n"
-      );
+      throw new Error(Reporter.reportOpenPortUnAvailablityOnHost(hostname, err));
     });
 };
