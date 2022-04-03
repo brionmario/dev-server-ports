@@ -24,9 +24,22 @@
 
 import chalk from "chalk";
 import { getProcessForPort } from "./helpers";
-import { IProcessInfo, IReporter } from "./models";
+import { IProcessInfo, IReporter, IReporterExtensions } from "./models";
 
 export class Reporter implements IReporter {
+
+  static extensions: Partial<IReporterExtensions> | undefined;
+  static overrides: Partial<IReporter> | undefined;
+
+  /**
+   * Constructor.
+   * @param extensions - Extensions.
+   * @param overrides - Overrides.
+   */
+  constructor(extensions?: Partial<IReporterExtensions>, overrides?: Partial<IReporter>) {
+    Reporter.extensions = extensions;
+    Reporter.overrides = overrides;
+  }
 
   /**
    * Get the root permission required message
@@ -34,6 +47,8 @@ export class Reporter implements IReporter {
    * @param wellknownPortRange - Range of reserved wellknown ports.
    * @returns Returns a formatted root permission required message as a string.
    */
+  @override()
+  @extend()
   getMissingRootPermissionMessage(wellknownPortRange: number[]): string {
     return chalk.redBright(`Admin permissions are required to run a server on a port below ${
       wellknownPortRange[1] }.`);
@@ -45,6 +60,8 @@ export class Reporter implements IReporter {
    * @param process - Process info.
    * @returns Returns a formatted process info report as a string.
    */
+  @override()
+  @extend()
   getProcessInfoReport(process: IProcessInfo): string {
     return `
     process       : ${ chalk.cyan(process.command) }
@@ -58,6 +75,8 @@ export class Reporter implements IReporter {
    * @param port - Port which the server is running on.
    * @returns Returns a formatted port in use disclaimer message as a string.
    */
+  @override()
+  @extend()
   getPortInUseDisclaimerMessage(port: number): string {
 
     return `${ chalk.bgRedBright(chalk.whiteBright("PORT IN USE")) } ${
@@ -71,16 +90,18 @@ export class Reporter implements IReporter {
    * @param availablePorts - Available ports.
    * @returns Returns a formatted port fallback prompt message as a string.
    */
+  @override()
+  @extend()
   getNonePortFallbackMessage(availablePorts: number[]): string {
 
     return `
 ${ chalk.yellowBright("If possible, free up the port or choose an avaiable one.") }
 
 The following ${ availablePorts.length > 1 ? "ports are" : "port is" } available:
-    
+
         ${ chalk.green(availablePorts.join("\n")) }
-        
-${ chalk.white("Press ctrl/cmd + c to exit.") }`;
+
+${ this.getProcessTerminationMessage() }`;
   }
 
   /**
@@ -88,6 +109,8 @@ ${ chalk.white("Press ctrl/cmd + c to exit.") }`;
    *
    * @returns Returns a formatted port fallback confirmation message as a string.
    */
+  @override()
+  @extend()
   getPortFallbackConfirmation(): string {
 
     return "Would you like to run the app on another port instead?";
@@ -101,6 +124,8 @@ ${ chalk.white("Press ctrl/cmd + c to exit.") }`;
    * @param isInteractive - Should show port fallback confirmation on the prompt.
    * @returns Returns a formatted port in use prompt as a string.
    */
+  @override()
+  @extend()
   buildPortInUsePromptMessage(port: number, availablePort: number, isInteractive: boolean | undefined): string {
 
     const { command, directory, pid } = getProcessForPort(port);
@@ -119,6 +144,8 @@ ${ confirmation }`;
    *
    * @returns Returns un-interative terminal error message as a string.
    */
+  @override()
+  @extend()
   getUnInteractiveTerminalError(): string {
 
     return chalk.red("Prompt couldn't be rendered in the current environment.");
@@ -129,6 +156,8 @@ ${ confirmation }`;
    *
    * @returns Returns a generic prompt error message as a string.
    */
+  @override()
+  @extend()
   getGenericPromptError(): string {
 
     return chalk.red("Something wen wrong when trying to render the prompt.");
@@ -141,10 +170,83 @@ ${ confirmation }`;
    * @param error - Error object.
    * @returns Returns no open port on host error message as string.
    */
+  @override()
+  @extend()
   getOpenPortUnAvailablityOnHost(hostname: string | undefined, error: Error): string {
     return `${ chalk.red(`Could not find an open port at ${ chalk.bold(hostname) }.`) }
 
               (Network error message: ${ error.message || error })
     }`;
   }
+
+  /**
+   * Get process termination message.
+   *
+   * @returns Returns a message containing process termination info.
+   */
+  @override()
+  @extend()
+  getProcessTerminationMessage(): string {
+
+    return `${ chalk.white("Press ctrl/cmd + c to exit.") }`;
+  }
+}
+
+/**
+ * Override decorator.
+ *
+ * @returns Returns the result of the execution.
+ */
+function override(): any {
+
+  return function(_target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
+
+    const originalMethod = descriptor.value;
+
+    descriptor.value = function (...args: any[]) {
+
+      let result: any = originalMethod.apply(this, args);
+
+      if ((this.constructor as any)?.overrides
+        && Object.prototype.hasOwnProperty.call((this.constructor as any).overrides, propertyKey)) {
+        result = (this.constructor as any).overrides[propertyKey].apply(this, args);
+      }
+
+      return result;
+    };
+  };
+}
+
+/**
+ * Extension decorator.
+ *
+ * @returns Returns the result of the execution.
+ */
+function extend(): any {
+
+  return function(_target: unknown, propertyKey: string, descriptor: PropertyDescriptor) {
+
+    const originalMethod = descriptor.value;
+
+    descriptor.value = function (...args: any[]) {
+
+      let result: any = originalMethod.apply(this, args);
+
+      if ((this.constructor as any)?.extensions) {
+        if (Object.prototype.hasOwnProperty.call((this.constructor as any).extensions, `BEFORE_${ propertyKey }`)) {
+          result = `${ (this.constructor as any).extensions[`BEFORE_${ propertyKey }`].apply(this, args) }
+
+${ result }`;
+        }
+
+        if (Object.prototype.hasOwnProperty.call((this.constructor as any).extensions, `AFTER_${ propertyKey }`)) {
+          result = `${ result }
+
+${ (this.constructor as any).extensions[`AFTER_${ propertyKey }`].apply(this, args) }`;
+        }
+      }
+
+      return result;
+    };
+  };
 }

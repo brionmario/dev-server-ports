@@ -28,7 +28,8 @@ import readline from "readline";
 import detect from "detect-port";
 import inquirer, { Question } from "inquirer";
 import isRoot from "is-root";
-import { IProcessInfo, IReporter } from "./models";
+import { WELL_KNOWN_PORT_RANGE } from "./constants";
+import { IProcessInfo, IReporter, IReporterExtensions } from "./models";
 import { Reporter } from "./reporter";
 import { logger } from "./utils";
 
@@ -200,14 +201,19 @@ const showNonInteractivePrompt = (message: string): void => {
  *
  * @param port - Preffered port number. ex: 3000
  * @param hostname - Host name. ex: "0.0.0.0" | "localhost"
+ * @param reporter - Reporter overrides and extensions.
  * @returns Returns a promise that resolves to the available port or null on error.
  */
 export const findPort = (port: number,
   hostname?: string,
-  shouldFallback?: boolean | undefined
+  shouldFallback?: boolean | undefined,
+  reporter?: {
+    extensions: Partial<IReporterExtensions>;
+    overrides: Partial<IReporter>;
+  }
 ): Promise<number | null> => {
 
-  const reporter: IReporter = new Reporter();
+  const _reporter: IReporter = new Reporter(reporter?.extensions, reporter?.overrides);
 
   return detect({
     hostname,
@@ -225,14 +231,14 @@ export const findPort = (port: number,
 
         const question: Question = {
           default: true,
-          message: reporter.buildPortInUsePromptMessage(port, availablePort, shouldFallback),
+          message: _reporter.buildPortInUsePromptMessage(port, availablePort, shouldFallback),
           name: "shouldChangePort",
           type: "confirm"
         };
 
-        // 
+        // If the port needs permission to run, show a message & terminate on ctrl + c.
         if (needSudoPermissions) {
-          showNonInteractivePrompt(reporter.getMissingRootPermissionMessage(WELL_KNOWN_PORT_RANGE));
+          showNonInteractivePrompt(_reporter.getMissingRootPermissionMessage(WELL_KNOWN_PORT_RANGE));
 
           return;
         }
@@ -255,9 +261,9 @@ export const findPort = (port: number,
               })
               .catch((error) => {
                 if (error.isTtyError) {
-                  reporter.getUnInteractiveTerminalError();
+                  _reporter.getUnInteractiveTerminalError();
                 } else {
-                  reporter.getGenericPromptError();
+                  _reporter.getGenericPromptError();
                 }
               });
           }
@@ -267,6 +273,6 @@ export const findPort = (port: number,
       }
     ),
     (err) => {
-      throw new Error(reporter.getOpenPortUnAvailablityOnHost(hostname, err));
+      throw new Error(_reporter.getOpenPortUnAvailablityOnHost(hostname, err));
     });
 };

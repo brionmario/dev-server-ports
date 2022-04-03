@@ -98,4 +98,40 @@ export interface IReporter {
    * @returns Returns no open port on host error message as string.
    */
   getOpenPortUnAvailablityOnHost(hostname: string | undefined, error: Error): string;
+  /**
+   * Get process termination message.
+   * @returns Returns a message containing process termination info.
+   */
+   getProcessTerminationMessage(): string;
 }
+
+/**
+ * Interface for Reporter Message Extensions.
+ */
+export type IReporterExtensions = {
+  [ key in ReporterExtensionPoints ]: (...args: any[]) => string;
+}
+
+/**
+ * Reporter Extension Points.
+ */
+export type ReporterExtensionPoints = "BEFORE_getMissingRootPermissionMessage"
+  | "AFTER_getMissingRootPermissionMessage"
+  | "BEFORE_getProcessInfoReport"
+  | "AFTER_getProcessInfoReport"
+  | "BEFORE_getPortInUseDisclaimerMessage"
+  | "AFTER_getPortInUseDisclaimerMessage"
+  | "BEFORE_getNonePortFallbackMessage"
+  | "AFTER_getNonePortFallbackMessage"
+  | "BEFORE_getPortFallbackConfirmation"
+  | "AFTER_getPortFallbackConfirmation"
+  | "BEFORE_buildPortInUsePromptMessage"
+  | "AFTER_buildPortInUsePromptMessage"
+  | "BEFORE_getUnInteractiveTerminalError"
+  | "AFTER_getUnInteractiveTerminalError"
+  | "BEFORE_getGenericPromptError"
+  | "AFTER_getGenericPromptError"
+  | "BEFORE_getOpenPortUnAvailablityOnHost"
+  | "AFTER_getOpenPortUnAvailablityOnHost"
+  | "BEFORE_getProcessTerminationMessage"
+  | "AFTER_getProcessTerminationMessage";
