@@ -32,7 +32,7 @@ jobs:
 
       - name: 🛠️ Bootstrap Dependencies
         id: bootstrap-dependencies-with-cache
-        run: yarn install --immutable --immutable-cache --check-cache
+        run: yarn install --immutable --immutable-cache --check-cache --ignore-engines
 
       - name: 🏗️ Build
         id: build-the-lib
