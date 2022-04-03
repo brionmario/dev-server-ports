@@ -36,9 +36,6 @@ import { logger } from "./utils";
 // Check if the process is running on a text terminal.
 const IS_INTERACTIVE: boolean = process.stdout.isTTY;
 
-// Reserved well-known ports that require sudo permissions.
-const WELL_KNOWN_PORT_RANGE: number[] = [ 0, 1023 ];
-
 const execOptions: ExecSyncOptionsWithStringEncoding = {
   encoding: "utf8",
   // eslint-disable-next-line @typescript-eslint/no-array-constructor
