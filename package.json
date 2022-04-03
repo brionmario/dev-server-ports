@@ -25,7 +25,7 @@
         "src"
     ],
     "engines": {
-        "node": ">=10"
+        "node": ">=16"
     },
     "scripts": {
         "build": "tsdx build",
