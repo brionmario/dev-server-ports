@@ -31,10 +31,12 @@ export class Reporter implements IReporter {
   /**
    * Get the root permission required message
    *
+   * @param wellknownPortRange - Range of reserved wellknown ports.
    * @returns Returns a formatted root permission required message as a string.
    */
-  getMissingRootPermissionMessage(): string {
-    return chalk.redBright("Admin permissions are required to run a server on a port below 1024.");
+  getMissingRootPermissionMessage(wellknownPortRange: number[]): string {
+    return chalk.redBright(`Admin permissions are required to run a server on a port below ${
+      wellknownPortRange[1] }.`);
   }
 
   /**
@@ -96,13 +98,13 @@ ${ chalk.white("Press ctrl/cmd + c to exit.") }`;
    *
    * @param port - Requested Port.
    * @param availablePort - Aavailable port.
-   * @param shouldFallback - Should show fallback option.
+   * @param isInteractive - Should show port fallback confirmation on the prompt.
    * @returns Returns a formatted port in use prompt as a string.
    */
-  buildPortInUsePromptMessage(port: number, availablePort: number, shouldFallback: boolean | undefined): string {
+  buildPortInUsePromptMessage(port: number, availablePort: number, isInteractive: boolean | undefined): string {
 
     const { command, directory, pid } = getProcessForPort(port);
-    const confirmation: string = shouldFallback
+    const confirmation: string = isInteractive
       ? this.getPortFallbackConfirmation()
       : this.getNonePortFallbackMessage([ availablePort ]);
 

@@ -46,9 +46,10 @@ export interface IProcessInfo {
 export interface IReporter {
   /**
    * Get the root permission required message.
+   * @param wellknownPortRange - Range of reserved wellknown ports.
    * @returns Returns a formatted root permission required message as a string.
    */
-  getMissingRootPermissionMessage(): string;
+  getMissingRootPermissionMessage(wellknownPortRange: number[]): string;
   /**
    * Get the process information report.
    * @param process - Process info.
@@ -76,10 +77,10 @@ export interface IReporter {
    * Build and print the port fallback confirmarion message.
    * @param port - Requested Port.
    * @param availablePort - Aavailable port.
-   * @param shouldFallback - Should show fallback option.
+   * @param isInteractive - Should show port fallback confirmation on the prompt.
    * @returns Returns a formatted port in use prompt as a string.
    */
-  buildPortInUsePromptMessage(port: number, availablePort: number, shouldFallback: boolean | undefined): string;
+  buildPortInUsePromptMessage(port: number, availablePort: number, isInteractive: boolean | undefined): string;
   /**
    * Get the un-interative terminal error message.
    * @returns Returns un-interative terminal error message as a string.

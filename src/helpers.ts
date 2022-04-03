@@ -25,7 +25,6 @@
 import child_process, { ExecSyncOptionsWithStringEncoding } from "child_process";
 import path from "path";
 import readline from "readline";
-import chalk from "chalk";
 import detect from "detect-port";
 import inquirer, { Question } from "inquirer";
 import isRoot from "is-root";
@@ -35,6 +34,9 @@ import { logger } from "./utils";
 
 // Check if the process is running on a text terminal.
 const IS_INTERACTIVE: boolean = process.stdout.isTTY;
+
+// Reserved well-known ports that require sudo permissions.
+const WELL_KNOWN_PORT_RANGE: number[] = [ 0, 1023 ];
 
 const execOptions: ExecSyncOptionsWithStringEncoding = {
   encoding: "utf8",
@@ -177,6 +179,23 @@ export const getProcessForPort = (port: number): IProcessInfo => {
 };
 
 /**
+ * Shows a message without any interactions and exits the process on `ctrl+c`.
+ * @param message - Message to show.
+ */
+const showNonInteractivePrompt = (message: string): void => {
+
+  logger.info(message);
+  readline.emitKeypressEvents(process.stdin);
+  process.stdin.setRawMode(true);
+  process.stdin.resume();
+  process.stdin.on("keypress", (str) => {
+    if (str === "\u0003") {
+      process.exit();
+    }
+  });
+};
+
+/**
  * Find a port that is available for use.
  *
  * @param port - Preffered port number. ex: 3000
@@ -200,34 +219,30 @@ export const findPort = (port: number,
           return resolve(availablePort);
         }
 
-        const needSudoPermissions: boolean = (process.platform !== "win32" && availablePort < 1024 && !isRoot());
+        const needSudoPermissions: boolean = (process.platform !== "win32"
+          && (port < WELL_KNOWN_PORT_RANGE[1] || availablePort < WELL_KNOWN_PORT_RANGE[1])
+          && !isRoot());
 
-        const disclaimer: string = needSudoPermissions
-          ? reporter.getMissingRootPermissionMessage()
-          : reporter.getPortInUseDisclaimerMessage(port);
+        const question: Question = {
+          default: true,
+          message: reporter.buildPortInUsePromptMessage(port, availablePort, shouldFallback),
+          name: "shouldChangePort",
+          type: "confirm"
+        };
+
+        // 
+        if (needSudoPermissions) {
+          showNonInteractivePrompt(reporter.getMissingRootPermissionMessage(WELL_KNOWN_PORT_RANGE));
+
+          return;
+        }
 
         if (IS_INTERACTIVE) {
           // First clear the terminal.
           clearTerminal();
 
-          const question: Question = {
-            default: true,
-            message: reporter.buildPortInUsePromptMessage(port, availablePort, shouldFallback),
-            name: "shouldChangePort",
-            type: "confirm"
-          };
-
           if (shouldFallback === false) {
-            logger.info(question.message);
-
-            readline.emitKeypressEvents(process.stdin);
-            process.stdin.setRawMode(true);
-            process.stdin.resume();
-            process.stdin.on("keypress", (str) => {
-              if (str === "\u0003") {
-                process.exit();
-              }
-            });
+            showNonInteractivePrompt(question.message as string);
           } else {
             inquirer
               .prompt([ question ])
@@ -235,7 +250,7 @@ export const findPort = (port: number,
                 if (answers.shouldChangePort) {
                   resolve(availablePort);
                 } else {
-                  resolve(null);
+                  process.exit();
                 }
               })
               .catch((error) => {
@@ -247,8 +262,7 @@ export const findPort = (port: number,
               });
           }
         } else {
-          logger.error(chalk.red(disclaimer));
-          resolve(null);
+          showNonInteractivePrompt(question.message as string);
         }
       }
     ),
