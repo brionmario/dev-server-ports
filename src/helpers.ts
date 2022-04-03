@@ -24,10 +24,12 @@
 
 import child_process, { ExecSyncOptionsWithStringEncoding } from "child_process";
 import path from "path";
+import readline from "readline";
 import chalk from "chalk";
 import detect from "detect-port";
 import inquirer, { Question } from "inquirer";
 import isRoot from "is-root";
+import { IProcessInfo, IReporter } from "./models";
 import { Reporter } from "./reporter";
 import { logger } from "./utils";
 
@@ -151,18 +153,26 @@ export const getProcessCommand = (processId: string, processDirectory: string): 
  * Get the process information for the given port.
  *
  * @param port - Port number.
- * @returns Returns the process information.
+ * @returns Returns the process information or null.
  */
-export const getProcessForPort = (port: number) => {
+export const getProcessForPort = (port: number): IProcessInfo => {
   
   try {
-    const processId: string = getProcessIdOnPort(port);
-    const directory: string = getDirectoryOfProcessById(processId);
-    const command: string= getProcessCommand(processId, directory);
+    const pid: string = getProcessIdOnPort(port);
+    const directory: string = getDirectoryOfProcessById(pid);
+    const command: string= getProcessCommand(pid, directory);
 
-    return Reporter.reportProcessInfo(command, processId, directory);
+    return {
+      command,
+      directory,
+      pid
+    };
   } catch (e) {
-    return null;
+    return {
+      command: undefined,
+      directory: undefined,
+      pid: undefined
+    };
   }
 };
 
@@ -175,58 +185,67 @@ export const getProcessForPort = (port: number) => {
  */
 export const findPort = (port: number,
   hostname?: string,
-  skip?: number
+  shouldFallback?: boolean | undefined
 ): Promise<number | null> => {
 
-  if (skip) {
-    if (__DEV__) {
-      logger.debug("Skipping port feature is not yet implemented.");
-    }
-  }
+  const reporter: IReporter = new Reporter();
 
   return detect({
     hostname,
     port
   })
-    .then((_port) => new Promise(
+    .then((availablePort: number) => new Promise(
       (resolve) => {
-        if (_port === port) {
-          return resolve(_port);
+        if (availablePort === port) {
+          return resolve(availablePort);
         }
 
-        const disclaimer: string = (process.platform !== "win32" && _port < 1024 && !isRoot())
-          ? Reporter.reportRequireRootPermission()
-          : Reporter.reportPortInUseDisclaimer(_port);
+        const needSudoPermissions: boolean = (process.platform !== "win32" && availablePort < 1024 && !isRoot());
+
+        const disclaimer: string = needSudoPermissions
+          ? reporter.getMissingRootPermissionMessage()
+          : reporter.getPortInUseDisclaimerMessage(port);
 
         if (IS_INTERACTIVE) {
           // First clear the terminal.
           clearTerminal();
 
-          const processInfo: string | null = getProcessForPort(port);
-          const confirmation: string = Reporter.reportPortFallbackConfirmation();
           const question: Question = {
             default: true,
-            message: Reporter.reportPortInUse(disclaimer, processInfo, confirmation),
+            message: reporter.buildPortInUsePromptMessage(port, availablePort, shouldFallback),
             name: "shouldChangePort",
             type: "confirm"
           };
 
-          inquirer
-            .prompt([ question ])
-            .then((answers) => {
-              if (answers.shouldChangePort) {
-                resolve(_port);
-              } else {
-                resolve(null);
-              }
-            })
-            .catch((error) => {
-              if (error.isTtyError) {
-                Reporter.reportUninteractiveTerminalError();
-              } else {
-                Reporter.reportGenericPromptError();
+          if (shouldFallback === false) {
+            logger.info(question.message);
+
+            readline.emitKeypressEvents(process.stdin);
+            process.stdin.setRawMode(true);
+            process.stdin.resume();
+            process.stdin.on("keypress", (str) => {
+              if (str === "\u0003") {
+                process.exit();
               }
             });
+          } else {
+            inquirer
+              .prompt([ question ])
+              .then((answers) => {
+                if (answers.shouldChangePort) {
+                  resolve(availablePort);
+                } else {
+                  resolve(null);
+                }
+              })
+              .catch((error) => {
+                if (error.isTtyError) {
+                  reporter.getUnInteractiveTerminalError();
+                } else {
+                  reporter.getGenericPromptError();
+                }
+              });
+          }
         } else {
           logger.error(chalk.red(disclaimer));
           resolve(null);
@@ -234,6 +253,6 @@ export const findPort = (port: number,
       }
     ),
     (err) => {
-      throw new Error(Reporter.reportOpenPortUnAvailablityOnHost(hostname, err));
+      throw new Error(reporter.getOpenPortUnAvailablityOnHost(hostname, err));
     });
 };

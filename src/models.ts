@@ -22,127 +22,79 @@
  * SOFTWARE.
  */
 
-import chalk from "chalk";
-import { getProcessForPort } from "./helpers";
-import { IProcessInfo, IReporter } from "./models";
-
-export class Reporter implements IReporter {
-
+/**
+ * Interface for Process information.
+ */
+export interface IProcessInfo {
   /**
-   * Get the root permission required message
-   *
+   * Process id.
+   * @example "3158"
+   */
+  pid: string | undefined;
+  /**
+   * Command which started the process.
+   * @example "http-server"
+   */
+  command: string | undefined;
+  /**
+   * Directory which initiated the process.
+   * @example "/Users/brion/Projects/demo-app"
+   */
+  directory: string | undefined;
+}
+
+export interface IReporter {
+  /**
+   * Get the root permission required message.
    * @returns Returns a formatted root permission required message as a string.
    */
-  getMissingRootPermissionMessage(): string {
-    return chalk.redBright("Admin permissions are required to run a server on a port below 1024.");
-  }
-
+  getMissingRootPermissionMessage(): string;
   /**
    * Get the process information report.
-   *
    * @param process - Process info.
    * @returns Returns a formatted process info report as a string.
    */
-  getProcessInfoReport(process: IProcessInfo): string {
-    return `
-    process       : ${ chalk.cyan(process.command) }
-    pid           : ${ chalk.grey(process.pid)}
-    invoked from  : ${ chalk.blue(process.directory) }`;
-  }
-
+   getProcessInfoReport(process: IProcessInfo): string;
   /**
    * Get the port in use disclaimer message.
-   *
    * @param port - Port which the server is running on.
    * @returns Returns a formatted port in use disclaimer message as a string.
    */
-  getPortInUseDisclaimerMessage(port: number): string {
-
-    return `${ chalk.bgRedBright(chalk.whiteBright("PORT IN USE")) } ${
-      chalk.white("-" )
-    } Someone is already using the port ${ chalk.bold(chalk.yellowBright(port)) }.`;
-  }
-
+  getPortInUseDisclaimerMessage(port: number): string;
   /**
    * Get the port fallback confirmarion message.
-   *
    * @param availablePorts - Available ports.
    * @returns Returns a formatted port fallback prompt message as a string.
    */
-  getNonePortFallbackMessage(availablePorts: number[]): string {
-
-    return `
-${ chalk.yellowBright("If possible, free up the port or choose an avaiable one.") }
-
-The following ${ availablePorts.length > 1 ? "ports are" : "port is" } available:
-    
-        ${ chalk.green(availablePorts.join("\n")) }
-        
-${ chalk.white("Press ctrl/cmd + c to exit.") }`;
-  }
-
+  getNonePortFallbackMessage(availablePorts: number[]): string;
   /**
    * Get the port fallback confirmation message.
-   *
    * @returns Returns a formatted port fallback confirmation message as a string.
    */
-  getPortFallbackConfirmation(): string {
-
-    return "Would you like to run the app on another port instead?";
-  }
-
+  getPortFallbackConfirmation(): string;
   /**
    * Build and print the port fallback confirmarion message.
-   *
    * @param port - Requested Port.
    * @param availablePort - Aavailable port.
    * @param shouldFallback - Should show fallback option.
    * @returns Returns a formatted port in use prompt as a string.
    */
-  buildPortInUsePromptMessage(port: number, availablePort: number, shouldFallback: boolean | undefined): string {
-
-    const { command, directory, pid } = getProcessForPort(port);
-    const confirmation: string = shouldFallback
-      ? this.getPortFallbackConfirmation()
-      : this.getNonePortFallbackMessage([ availablePort ]);
-
-    return `${ this.getPortInUseDisclaimerMessage(port) }
-    ${ this.getProcessInfoReport({ command, directory, pid }) }
-    
-${ confirmation }`;
-  }
-
+  buildPortInUsePromptMessage(port: number, availablePort: number, shouldFallback: boolean | undefined): string;
   /**
    * Get the un-interative terminal error message.
-   *
    * @returns Returns un-interative terminal error message as a string.
    */
-  getUnInteractiveTerminalError(): string {
-
-    return chalk.red("Prompt couldn't be rendered in the current environment.");
-  }
-
+  getUnInteractiveTerminalError(): string;
   /**
    * Get the generic prompt error message.
-   *
    * @returns Returns a generic prompt error message as a string.
    */
-  getGenericPromptError(): string {
-
-    return chalk.red("Something wen wrong when trying to render the prompt.");
-  }
-
+  getGenericPromptError(): string;
   /**
    * Get no open port on host error message.
-   *
    * @param hostname - Host.
    * @param error - Error object.
    * @returns Returns no open port on host error message as string.
    */
-  getOpenPortUnAvailablityOnHost(hostname: string | undefined, error: Error): string {
-    return `${ chalk.red(`Could not find an open port at ${ chalk.bold(hostname) }.`) }
-
-              (Network error message: ${ error.message || error })
-    }`;
-  }
+  getOpenPortUnAvailablityOnHost(hostname: string | undefined, error: Error): string;
 }
