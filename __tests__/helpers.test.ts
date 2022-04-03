@@ -37,7 +37,7 @@ describe("Test the helpers.", () => {
   });
 
   it("Find port function properly handles an available port.", async () => {
-    const port = await findPort("localhost", 3001);
+    const port = await findPort(3001, "localhost");
 
     expect(port)
       .toBe(3001);
