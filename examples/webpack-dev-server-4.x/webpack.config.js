@@ -22,4 +22,43 @@
  * SOFTWARE.
  */
 
-export * from "./public-api";
+const path = require("path");
+const { findPort } = require("dev-server-ports");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+
+const DEFAULT_PORT = 3000;
+const HOST = "localhost";
+
+module.exports = async (env) => {
+
+  const IS_PRODUCTION = env.production;
+  const PORT = await findPort(DEFAULT_PORT, HOST, false, {
+    extensions: {
+      BEFORE_getProcessTerminationMessage: () => {
+        return `Read through the README.md (https://github.com/brionmario/dev-server-ports/blob/main/README.md)
+file for more information.`;
+      }
+    }
+  });
+
+  return {
+    devServer: {
+      host: HOST,
+      https: true,
+      port: PORT,
+      static: {
+        directory: path.join(__dirname, "dist")
+      }
+    },
+    devtool: IS_PRODUCTION ? "source-map" : "eval",
+    entry: "./src/index.js",
+    mode: IS_PRODUCTION ? "production" : "development",
+    output: {
+      filename: "main.js",
+      path: path.resolve(__dirname, "dist")
+    },
+    plugins: [
+      new HtmlWebpackPlugin()
+    ]
+  };
+};

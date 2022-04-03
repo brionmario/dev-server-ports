@@ -22,4 +22,7 @@
  * SOFTWARE.
  */
 
-export * from "./public-api";
+/* eslint-disable no-var */
+
+// ./types/index.d.ts
+declare var __DEV__: boolean;

@@ -1,0 +1,24 @@
+{
+  "projectName": "dev-server-ports",
+  "projectOwner": "Brion Mario",
+  "repoType": "github",
+  "repoHost": "https://github.com",
+  "files": [
+    "README.md"
+  ],
+  "imageSize": 100,
+  "commit": true,
+  "commitConvention": "angular",
+  "contributors": [
+    {
+      "login": "brionmario",
+      "name": "Brion Mario",
+      "avatar_url": "https://avatars.githubusercontent.com/u/25959096?v=4",
+      "profile": "http://www.brionmario.com/",
+      "contributions": [
+        "code"
+      ]
+    }
+  ],
+  "contributorsPerLine": 7
+}

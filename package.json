@@ -28,40 +28,45 @@
         "node": ">=10"
     },
     "scripts": {
-        "start": "tsdx watch",
         "build": "tsdx build",
-        "test": "tsdx test",
+        "contributors:add": "all-contributors add",
+        "contributors:generate": "all-contributors generate",
+        "cm": "cz",
         "lint": "eslint --ext .js,.ts .",
         "prepare": "tsdx build",
-        "size": "size-limit",
-        "analyze": "size-limit --why"
+        "semantic-release": "semantic-release",
+        "start": "tsdx watch",
+        "test": "tsdx test",
+        "typecheck": "tsc"
     },
     "husky": {
         "hooks": {
-            "pre-commit": "npm run lint"
+            "pre-commit": "npm run lint",
+            "prepare-commit-msg": "exec < /dev/tty && npx cz --hook || true"
         }
     },
-    "module": "dist/dynamic-dev-server-port.esm.js",
-    "size-limit": [
-        {
-            "path": "dist/dynamic-dev-server-port.cjs.production.min.js",
-            "limit": "10 KB"
-        },
-        {
-            "path": "dist/dynamic-dev-server-port.esm.js",
-            "limit": "10 KB"
-        }
-    ],
+    "module": "dist/dev-server-ports.esm.js",
     "devDependencies": {
-        "@size-limit/preset-small-lib": "^7.0.8",
+        "@types/detect-port": "^1.3.2",
+        "@types/inquirer": "^8.2.0",
         "@typescript-eslint/eslint-plugin": "^5.16.0",
         "@typescript-eslint/parser": "^5.16.0",
+        "all-contributors-cli": "^6.20.0",
+        "commitizen": "^4.2.4",
+        "cz-conventional-changelog": "^3.3.0",
         "eslint": "^8.12.0",
         "eslint-plugin-import": "^2.25.4",
+        "eslint-plugin-tsdoc": "^0.2.14",
         "husky": "^7.0.4",
-        "size-limit": "^7.0.8",
+        "semantic-release": "^19.0.2",
         "tsdx": "^0.14.1",
         "tslib": "^2.3.1",
         "typescript": "^4.6.3"
+    },
+    "dependencies": {
+        "chalk": "^4.1.2",
+        "detect-port": "^1.3.0",
+        "inquirer": "^8.2.2",
+        "is-root": "^2.1.0"
     }
 }

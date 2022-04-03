@@ -22,4 +22,14 @@
  * SOFTWARE.
  */
 
-export * from "./public-api";
+/* eslint-disable no-console */
+export const logger: {
+  debug: (message?: any, ...optionalParams: any[]) => void;
+  error: (message?: any, ...optionalParams: any[]) => void;
+  info: (message?: any, ...optionalParams: any[]) => void;
+} = {
+  debug: console.debug,
+  error: console.error,
+  info: console.log
+};
+/* eslint-disable no-console */

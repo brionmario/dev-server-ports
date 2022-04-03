@@ -1,0 +1,24 @@
+{
+    "name": "dev-server-ports-webpack-dev-server-4.x-sample",
+    "version": "0.1.0",
+    "description": "Sample usage of the dev-server-ports module in a Webpack Dev Server 4.x project",
+    "keywords": [
+        "webpack",
+        "webpack-dev-server",
+        "webpack-dev-server-4",
+        "dev-server-ports"
+    ],
+    "author": "Brion Mario",
+    "license": "MIT",
+    "private": true,
+    "scripts": {
+        "build": "webpack",
+        "start": "npx webpack serve"
+    },
+    "dependencies": {},
+    "devDependencies": {
+        "webpack": "^5.70.0",
+        "webpack-cli": "^4.9.2",
+        "webpack-dev-server": "^4.7.4"
+    }
+}

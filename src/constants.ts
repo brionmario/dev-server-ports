@@ -22,4 +22,5 @@
  * SOFTWARE.
  */
 
-export * from "./public-api";
+// Reserved well-known ports that require sudo permissions.
+export const WELL_KNOWN_PORT_RANGE: number[] = [ 0, 1024 ];
