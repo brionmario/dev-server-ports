@@ -1,7 +1,5 @@
 # This workflow will build PRs submitted to the main branch.
 
-name: Release
-
 name: Publish
 
 on:
