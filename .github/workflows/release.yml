@@ -50,7 +50,7 @@ jobs:
 
   release:
     name: 📦 Release
-    if: ${{ github.ref == "refs/heads/main" }}
+    if: ${{ github.ref == 'refs/heads/main' }}
     needs: [ build ]
     runs-on: ubuntu-latest
     strategy:
