@@ -12,12 +12,51 @@ on:
   workflow_dispatch:
 
 jobs:
-  release:
-    name: 📦 Release
+  build:
+    name: 👷 Build
     if: ${{ github.ref == 'refs/heads/main' }}
     strategy:
       matrix:
         node-version: [ 12.x, 14.x, 16.x ]
+        os: [ ubuntu-latest, macOS-latest ]
+    runs-on: ${{ matrix.os }}
+    steps:
+      - name: ⬇️ Checkout
+        id: checkout
+        uses: actions/checkout@v2.3.3
+
+      - name: 🟢 Setup node
+        id: setup-node
+        uses: actions/setup-node@v2
+        with:
+          node-version: ${{ matrix.node-version }}
+
+      - name: 🛠️ Bootstrap Dependencies
+        id: bootstrap-dependencies-with-cache
+        run: yarn install --immutable --immutable-cache --check-cache --ignore-engines
+
+      - name: 🏗️ Build
+        id: build-the-lib
+        run: yarn build
+
+      - name: 🐱 Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v3
+        id: yarn-cache
+        with:
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
+          restore-keys: |
+            ${{ runner.os }}-yarn-
+  release:
+    name: 📦 Release
+    needs: [ build ]
+    if: ${{ github.ref == 'refs/heads/main' }}
+    strategy:
+      matrix:
+        node-version: [ 14.x, 16.x ] # [semantic-release]: node >=14 is required.
         os: [ ubuntu-latest, macOS-latest ]
     runs-on: ${{ matrix.os }}
     steps:
