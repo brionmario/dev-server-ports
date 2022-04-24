@@ -210,25 +210,26 @@ export const findPort = (port: number,
   }
 ): Promise<number | null> => {
 
+  const _port: number = typeof port === "number" ? port : parseInt(port, 10);
   const _reporter: IReporter = new Reporter(reporter?.extensions, reporter?.overrides);
 
   return detect({
     hostname,
-    port
+    port: _port
   })
     .then((availablePort: number) => new Promise(
       (resolve) => {
-        if (availablePort === port) {
+        if (availablePort === _port) {
           return resolve(availablePort);
         }
 
         const needSudoPermissions: boolean = (process.platform !== "win32"
-          && (port < WELL_KNOWN_PORT_RANGE[1] || availablePort < WELL_KNOWN_PORT_RANGE[1])
+          && (_port < WELL_KNOWN_PORT_RANGE[1] || availablePort < WELL_KNOWN_PORT_RANGE[1])
           && !isRoot());
 
         const question: Question = {
           default: true,
-          message: _reporter.buildPortInUsePromptMessage(port, availablePort, shouldFallback),
+          message: _reporter.buildPortInUsePromptMessage(_port, availablePort, shouldFallback),
           name: "shouldChangePort",
           type: "confirm"
         };
