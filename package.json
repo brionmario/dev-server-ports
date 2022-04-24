@@ -1,7 +1,7 @@
 {
     "name": "dev-server-ports",
     "description": "Gracefully pick a port number for the dev server",
-    "version": "0.0.0-semantically-released",
+    "version": "2.0.0",
     "license": "MIT",
     "author": "Brion Mario",
     "keywords": [
