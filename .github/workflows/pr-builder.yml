@@ -1,23 +1,25 @@
 # This workflow will build PRs submitted to the main branch.
 
-name: PR Builder
+name: 🐳 PR Builder
 
 on:
   pull_request:
     branches: [ main ]
-    paths-ignore:
-      - "docs/**"
-      - "LICENSE"
-      - "**/*.md"
+    paths:
+      - ".github/**"
+      - "examples/**"
+      - "src/**"
+      - "types/**"
   workflow_dispatch:
 
 jobs:
   lint:
     name: 🍀 ESLint (STATIC ANALYSIS)
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [ 14.x ]
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: ⬇️ Checkout
         id: checkout
@@ -28,31 +30,36 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
       - name: 🛠️ Bootstrap Dependencies
         id: bootstrap-dependencies-with-cache
-        run: yarn install --immutable --immutable-cache --check-cache
+        run: |
+          npm install -g yarn
+          yarn install --immutable --immutable-cache --check-cache
 
       - name: ⏳ Lint
         run: yarn lint
 
-      - name: 🔆 Cache NPM directory
-        id: cache-npm-modules
-        uses: actions/cache@v2
+      - name: 🐱 Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v3
+        id: yarn-cache
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+            ${{ runner.os }}-yarn-
 
   typecheck:
     name: ʦ Typecheck (STATIC ANALYSIS)
-    runs-on: ubuntu-latest
     strategy:
       matrix:
         node-version: [ 14.x ]
+        os: [ ubuntu-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: ⬇️ Checkout
         id: checkout
@@ -63,32 +70,37 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
       - name: 🛠️ Bootstrap Dependencies
         id: bootstrap-dependencies-with-cache
-        run: yarn install --immutable --immutable-cache --check-cache
+        run: |
+          npm install -g yarn
+          yarn install --immutable --immutable-cache --check-cache
 
       - name: ☄️ Check Type Errors
         run: yarn typecheck
 
-      - name: 🔆 Cache NPM directory
-        id: cache-npm-modules
-        uses: actions/cache@v2
+      - name: 🐱 Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v3
+        id: yarn-cache
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+            ${{ runner.os }}-yarn-
 
   test:
     name: 👾 Unit Test (TESTING)
     needs: [ lint, typecheck ]
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ "12.x", "14.x", "16.x" ]
+        node-version: [ 12.x, 14.x, 16.x ]
+        os: [ ubuntu-latest, windows-latest, macOS-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: ⬇️ Checkout
         id: checkout
@@ -99,34 +111,38 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
       - name: 🛠️ Bootstrap Dependencies
         id: bootstrap-dependencies-with-cache
-        run: yarn install --immutable --immutable-cache --check-cache --ignore-engines
+        run: |
+          npm install -g yarn
+          yarn install --immutable --immutable-cache --check-cache
 
       - name: 🃏 Run Jest
         id: run-jest-test
         run: yarn test --ci --coverage --maxWorkers=2
 
-      - name: 🔆 Cache NPM directory
-        id: cache-npm-modules
-        uses: actions/cache@v2
+      - name: 🐱 Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v3
+        id: yarn-cache
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+            ${{ runner.os }}-yarn-
 
   build:
     name: 🚧 Build
     needs: [ lint, typecheck, test ]
-    runs-on: ubuntu-latest
     strategy:
       matrix:
-        node-version: [ "12.x", "14.x", "16.x" ]
+        node-version: [ 12.x, 14.x, 16.x ]
         os: [ ubuntu-latest, windows-latest, macOS-latest ]
+    runs-on: ${{ matrix.os }}
     steps:
       - name: ⬇️ Checkout
         id: checkout
@@ -137,22 +153,26 @@ jobs:
         uses: actions/setup-node@v2
         with:
           node-version: ${{ matrix.node-version }}
+          cache: 'yarn'
 
       - name: 🛠️ Bootstrap Dependencies
         id: bootstrap-dependencies-with-cache
-        run: yarn install --immutable --immutable-cache --check-cache --ignore-engines
+        run: |
+          npm install -g yarn
+          yarn install --immutable --immutable-cache --check-cache
 
       - name: 🏗️ Build
         id: build-the-lib
         run: yarn build
 
-      - name: 🔆 Cache NPM directory
-        id: cache-npm-modules
-        uses: actions/cache@v2
+      - name: 🐱 Get yarn cache directory path
+        id: yarn-cache-dir-path
+        run: echo "::set-output name=dir::$(yarn cache dir)"
+
+      - uses: actions/cache@v3
+        id: yarn-cache
         with:
-          path: ~/.npm
-          key: ${{ runner.os }}-build-${{ env.cache-name }}-${{ hashFiles('**/package-lock.json') }}
+          path: ${{ steps.yarn-cache-dir-path.outputs.dir }}
+          key: ${{ runner.os }}-yarn-${{ hashFiles('**/yarn.lock') }}
           restore-keys: |
-            ${{ runner.os }}-build-${{ env.cache-name }}-
-            ${{ runner.os }}-build-
-            ${{ runner.os }}-
+            ${{ runner.os }}-yarn-
