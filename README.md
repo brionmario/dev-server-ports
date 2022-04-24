@@ -1,15 +1,7 @@
 <p align="center">
   <img src="./docs/resources/logo.png" height="96">
+  <p align="center">Handle dev server ports like a boss 😎</p>
 </p>
-
-<p align="center">
-  <img src="./docs/resources/banner.png">
-</p>
-
-<br />
-<hr />
-<br />
-<br />
 
 <div align="center">
 
@@ -20,6 +12,10 @@
   <a href="">[![Commitizen friendly](https://img.shields.io/badge/commitizen-friendly-yellow.svg)](http://commitizen.github.io/cz-cli/)</a>
   <a href="">[![semantic-release: angular](https://img.shields.io/badge/semantic--release-angular-e10079?logo=semantic-release)](https://github.com/semantic-release/semantic-release)</a>
 </div>
+
+<p align="center">
+  <img src="./docs/resources/banner.png">
+</p>
 
 ## Table of Contents
 
