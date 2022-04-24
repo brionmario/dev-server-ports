@@ -1,4 +1,4 @@
-<p align="center">
+<p align="center" style="padding-top: 20px">
   <img src="./docs/resources/logo.png" height="96">
   <p align="center">Handle dev server ports like a boss 😎</p>
 </p>
