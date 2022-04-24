@@ -36,7 +36,7 @@ jobs:
         id: bootstrap-dependencies-with-cache
         run: |
           npm install -g yarn
-          yarn install --immutable --immutable-cache --check-cache
+          yarn install --immutable --immutable-cache --check-cache --ignore-engines
 
       - name: ⏳ Lint
         run: yarn lint
@@ -76,7 +76,7 @@ jobs:
         id: bootstrap-dependencies-with-cache
         run: |
           npm install -g yarn
-          yarn install --immutable --immutable-cache --check-cache
+          yarn install --immutable --immutable-cache --check-cache --ignore-engines
 
       - name: ☄️ Check Type Errors
         run: yarn typecheck
@@ -117,7 +117,7 @@ jobs:
         id: bootstrap-dependencies-with-cache
         run: |
           npm install -g yarn
-          yarn install --immutable --immutable-cache --check-cache
+          yarn install --immutable --immutable-cache --check-cache --ignore-engines
 
       - name: 🃏 Run Jest
         id: run-jest-test
@@ -159,7 +159,7 @@ jobs:
         id: bootstrap-dependencies-with-cache
         run: |
           npm install -g yarn
-          yarn install --immutable --immutable-cache --check-cache
+          yarn install --immutable --immutable-cache --check-cache --ignore-engines
 
       - name: 🏗️ Build
         id: build-the-lib

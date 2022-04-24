@@ -35,7 +35,7 @@ jobs:
         id: bootstrap-dependencies-with-cache
         run: |
           npm install -g yarn
-          yarn install --immutable --immutable-cache --check-cache
+          yarn install --immutable --immutable-cache --check-cache --ignore-engines
 
       - name: 🏗️ Build
         id: build-the-lib
