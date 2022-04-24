@@ -48,6 +48,7 @@
     "module": "dist/dev-server-ports.esm.js",
     "devDependencies": {
         "@semantic-release/changelog": "^6.0.1",
+        "@semantic-release/git": "^10.0.1",
         "@types/detect-port": "^1.3.2",
         "@types/inquirer": "^8.2.0",
         "@typescript-eslint/eslint-plugin": "^5.16.0",
