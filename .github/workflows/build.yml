@@ -1,6 +1,6 @@
 # This workflow will build PRs submitted to the main branch.
 
-name: 🚀 Release
+name: 🐳 Build
 
 on:
   push:
@@ -13,7 +13,7 @@ on:
 
 jobs:
   release:
-    name: 📦 Release
+    name: 👷 Build
     if: ${{ github.ref == 'refs/heads/main' }}
     strategy:
       matrix:
@@ -33,18 +33,13 @@ jobs:
 
       - name: 🛠️ Bootstrap Dependencies
         id: bootstrap-dependencies-with-cache
-        run: yarn install --immutable --immutable-cache --check-cache --ignore-engines
+        run: |
+          npm install -g yarn
+          yarn install --immutable --immutable-cache --check-cache
 
       - name: 🏗️ Build
         id: build-the-lib
         run: yarn build
-
-      - name: Release & Publish
-        id: release-and-publish
-        run: npm run semantic-release
-        env:
-          NPM_TOKEN: ${{ secrets.NPM_TOKEN }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
       - name: 🐱 Get yarn cache directory path
         id: yarn-cache-dir-path
