@@ -56,8 +56,8 @@ jobs:
     if: ${{ github.ref == 'refs/heads/main' }}
     strategy:
       matrix:
-        node-version: [ 14.x, 16.x ] # [semantic-release]: node >=14 is required.
-        os: [ ubuntu-latest, macOS-latest ]
+        node-version: [ 16.x ]
+        os: [ ubuntu-latest ]
     runs-on: ${{ matrix.os }}
     steps:
       - name: ⬇️ Checkout
