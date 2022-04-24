@@ -9,6 +9,7 @@ on:
     paths:
       - "src/**"
       - "types/**"
+      - README.md
   workflow_dispatch:
 
 jobs:

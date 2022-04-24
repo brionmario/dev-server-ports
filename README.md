@@ -17,7 +17,7 @@
   <img src="./docs/resources/banner.png">
 </p>
 
-## Table of Contents
+# Table of Contents
 
 - 💡 [Inspiration](#inspiration)
 - [Prerequisites](#prerequisites)
@@ -27,17 +27,17 @@
 - [Contributors](#contributors)
 - [License](#license)
 
-## Inspiration
+# Inspiration
 
 Sometimes we need to show our users a bit more context when the development ports conflict. Most of the already available packages lacks the support to customize the prompts. This package tries to solve this issue along with a lot more helpers that would supplement development pipelines when working with dev ports.
 
-## Prerequisites
+# Prerequisites
 
 - [Node.js](https://nodejs.org/en/download/) version `>=12.0.0` is required. ([Inquirer.js](https://github.com/SBoudrias/Inquirer.js) version used in the isn't compatible with lower node versions.)
 
-## API Reference
+# API Reference
 
-### `findPort`
+## `findPort`
 
 ```js
 findPort(
@@ -51,11 +51,11 @@ findPort(
 )
 ```
 
-#### Returns
+### Returns
 
 A `Promise` of type `number`.
 
-#### Description
+### Description
 
 |Argument|Type|Default Value|Required|Description|
 |--------|----|-------------|--------|-----------|
@@ -64,9 +64,9 @@ A `Promise` of type `number`.
 |shouldFallback|boolean| true |No|Should the function return a an available port. You can set this to false if you wish to show just a message to the user in case of a port conflict.|
 |reporter|`{ extensions: Partial<IReporterExtensions>; overrides: Partial<IReporter>;}`| - |No|Customize the messages shown to the user incase of a port conflict.|
 
-#### Usage
+### Usage
 
-##### Basic Usage
+#### Basic Usage
 
 `PORT` resolves to 3000 if the port is available. If the port is unavailable, users will get the chance to fallback to the nearest available port.
 
@@ -80,7 +80,7 @@ const PORT = await findPort(3000);
 
 ![Image](./docs/resources/port-conflict-output.png)
 
-##### Resolve port with no fallback
+#### Resolve port with no fallback
 
 If the port is not available, only a prompt will be shown to the user. You can customize this prompt to match the requirements.
 
@@ -101,16 +101,16 @@ file for more information.`;
 
 ![Image](./docs/resources/port-conflict-no-fallback-output.png)
 
-## Examples
+# Examples
 
-### Webpack Dev Server v4 example
+## Webpack Dev Server v4 example
 
 Usage of the library with [Webpack Dev Server v4](https://github.com/webpack/webpack-dev-server/releases/tag/v4.8.1) which is the latest version at the time of writting, can be found below.
 
 > 💡 Version 4.x doesn't allow to pass a function that returns a promise straight in to the `port` field of the `devServer` configuration.
 
 - [Source Code](./examples/webpack-dev-server-4.x/).
-## Contributors ✨
+# Contributors ✨
 
 Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/docs/en/emoji-key)):
 
@@ -130,6 +130,6 @@ Thanks goes to these wonderful people ([emoji key](https://allcontributors.org/d
 
 This project follows the [all-contributors](https://github.com/all-contributors/all-contributors) specification. Contributions of any kind welcome!
 
-## License
+# License
 
 This project is licensed under the MIT License. See the [LICENSE](./LICENSE) file for details.
